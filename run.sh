@@ -19,4 +19,6 @@ else
     export FLASK_DEBUG=0
 fi
 
-./app.py
+export FLASK_APP=tabletopscanner
+
+flask run
