@@ -1,3 +1,5 @@
+from .parser import serialize, deserialize
+
 import urllib.request
 import urllib.parse
 
@@ -9,5 +11,6 @@ class BggApi:
         self.url = base_url.format(urllib.parse.urlencode(query_params))
 
     def requestBuyList(self):
-        print(self.url)
-        return urllib.request.urlopen(self.url).read()
+        xml = urllib.request.urlopen(self.url).read()
+        games = deserialize(xml)
+        return (games, serialize(games))

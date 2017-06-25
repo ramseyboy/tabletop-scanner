@@ -1,5 +1,5 @@
 from tabletopscanner import app
-from tabletopscanner.bggapi import BggApi
+from tabletopscanner.boardgamegeekapi.api import BggApi
 from tabletopscanner.models import WantToBuy
 
 from flask import Flask, render_template, make_response
@@ -27,16 +27,18 @@ def buy_list():
     """
     Return user's buy list
     """
-    wanttobuy = WantToBuy.query.filter(WantToBuy.title == 'buy').first()
+    # wanttobuy = WantToBuy.query.filter(WantToBuy.title == 'buy').first()
 
-    if wanttobuy is None:
-        xml = api.requestBuyList()
-        rec = WantToBuy(title='buy', xml=xml.decode("utf-8"))
-        rec.save()
-    else:
-        xml = wanttobuy.xml
+    # if wanttobuy is None:
+    #     xml = api.requestBuyList()
+    #     rec = WantToBuy(title='buy', xml=xml.decode("utf-8"))
+    #     rec.save()
+    # else:
+    #     xml = wanttobuy.xml
 
-    return make_response(xml, 200, {'Content-Type': 'application/xml'})
+    buy = api.requestBuyList()
+
+    return make_response(buy[1], 200, {'Content-Type': 'application/json'})
 
 #health and environment endpoints
 health = HealthCheck(app, "/api/health")
