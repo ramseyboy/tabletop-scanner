@@ -1,4 +1,6 @@
-from flask import render_template, make_response
+import json
+
+from flask import render_template, make_response, url_for
 from healthcheck import HealthCheck, EnvironmentDump
 
 from tabletopscanner import app
@@ -8,7 +10,7 @@ api = BggApi('ramseyboy')
 
 
 @app.route('/')
-def root():
+def index():
     """
     Home page
     """
@@ -23,23 +25,49 @@ def not_found(error):
     return render_template('error.html'), 404
 
 
-@app.route('/api')
+@app.route('/api', methods=['GET'])
+def api_root():
+    """
+    Api root dir
+    """
+    links = []
+    for rule in app.url_map.iter_rules():
+        # Filter out rules we can't navigate to in a browser
+        # and rules that require parameters
+        if "GET" in rule.methods and has_no_empty_params(rule):
+            url = url_for(rule.endpoint, **(rule.defaults or {}))
+            if url.startswith('/api'):
+                links.append({'url': url, 'method': rule.endpoint})
+
+    return make_response(json.dumps(links, indent=4), 200, {'Content-Type': 'application/json'})
+
+
+def has_no_empty_params(rule):
+    defaults = rule.defaults if rule.defaults is not None else ()
+    arguments = rule.arguments if rule.arguments is not None else ()
+    return len(defaults) >= len(arguments)
+
+
+@app.route('/api/buy', methods=['GET'])
 def buy_list():
     """
-    Return user's buy list
+    Return user's wanttobuy list
     """
-    # wanttobuy = WantToBuy.query.filter(WantToBuy.title == 'buy').first()
 
-    # if wanttobuy is None:
-    #     xml = api.requestBuyList()
-    #     rec = WantToBuy(title='buy', xml=xml.decode("utf-8"))
-    #     rec.save()
-    # else:
-    #     xml = wanttobuy.xml
+    buy_list = api.request_buy_list()
 
-    buy = api.requestBuyList()
+    return make_response(buy_list[1], 200, {'Content-Type': 'application/json'})
 
-    return make_response(buy[1], 200, {'Content-Type': 'application/json'})
+
+@app.route('/api/play', methods=['GET'])
+def play_list():
+    """
+    Return user's wanttoplay list
+    """
+
+    play_list = api.request_play_list()
+
+    return make_response(play_list[1], 200, {'Content-Type': 'application/json'})
 
 
 # health and environment endpoints
