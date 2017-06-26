@@ -1,5 +1,6 @@
 from tabletopscanner import db
 
+
 class WantToBuy(db.Document):
     title = db.StringField()
     xml = db.StringField()

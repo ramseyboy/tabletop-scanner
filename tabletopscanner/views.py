@@ -1,12 +1,11 @@
+from flask import render_template, make_response
+from healthcheck import HealthCheck, EnvironmentDump
+
 from tabletopscanner import app
 from tabletopscanner.boardgamegeekapi.api import BggApi
-from tabletopscanner.models import WantToBuy
-
-from flask import Flask, render_template, make_response
-from healthcheck import HealthCheck, EnvironmentDump
-from datetime import datetime
 
 api = BggApi('ramseyboy')
+
 
 @app.route('/')
 def root():
@@ -15,12 +14,14 @@ def root():
     """
     return render_template('index.html'), 200
 
+
 @app.errorhandler(404)
 def not_found(error):
     """
     404 - Not Found route
     """
     return render_template('error.html'), 404
+
 
 @app.route('/api')
 def buy_list():
@@ -40,7 +41,8 @@ def buy_list():
 
     return make_response(buy[1], 200, {'Content-Type': 'application/json'})
 
-#health and environment endpoints
+
+# health and environment endpoints
 health = HealthCheck(app, "/api/health")
 envdump = EnvironmentDump(app, "/api/environment")
 

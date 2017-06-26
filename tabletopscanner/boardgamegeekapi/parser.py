@@ -1,9 +1,8 @@
-import xml.etree.cElementTree as et
 import json
+import xml.etree.cElementTree as et
 
 
 class Game():
-
     def __init__(self, gameid, collectionid, name, yearpublished, image, thumbnail):
         self.gameid = gameid
         self.collectionid = collectionid
@@ -14,7 +13,6 @@ class Game():
 
 
 class GameEncoder(json.JSONEncoder):
-
     def default(self, o):
         if isinstance(o, Game):
             return o.__dict__
