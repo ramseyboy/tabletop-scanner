@@ -2,12 +2,12 @@ import time
 import urllib.parse
 import urllib.request
 
-from .parser import serialize, deserialize
+from tabletopscanner.boardgamegeekapi.parser import deserialize
 
 
 class BggApi:
     DEFAULT_202_RETRY_TIMES = 5
-    DEFAULT_RETRY_DELAY = 3
+    DEFAULT_RETRY_DELAY = 5
 
     def __init__(self, username):
         self.base_url = "https://www.boardgamegeek.com/xmlapi2/collection?{0}"
@@ -24,7 +24,7 @@ class BggApi:
         xml = BggApi.__request_collection(url)
 
         games = deserialize(xml)
-        return games, serialize(games)
+        return games
 
     def request_play_list(self):
         """
@@ -37,7 +37,7 @@ class BggApi:
 
         xml = BggApi.__request_collection(url)
         games = deserialize(xml)
-        return games, serialize(games)
+        return games
 
     @staticmethod
     def __request_collection(url):

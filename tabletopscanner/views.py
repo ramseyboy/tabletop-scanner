@@ -5,6 +5,7 @@ from healthcheck import HealthCheck, EnvironmentDump
 
 from tabletopscanner import app
 from tabletopscanner.boardgamegeekapi.api import BggApi
+from tabletopscanner.boardgamegeekapi.game import serialize
 
 api = BggApi('ramseyboy')
 
@@ -56,7 +57,7 @@ def buy_list():
 
     buy_list = api.request_buy_list()
 
-    return make_response(buy_list[1], 200, {'Content-Type': 'application/json'})
+    return make_response(serialize(buy_list), 200, {'Content-Type': 'application/json'})
 
 
 @app.route('/api/play', methods=['GET'])
@@ -67,7 +68,7 @@ def play_list():
 
     play_list = api.request_play_list()
 
-    return make_response(play_list[1], 200, {'Content-Type': 'application/json'})
+    return make_response(serialize(play_list), 200, {'Content-Type': 'application/json'})
 
 
 # health and environment endpoints
