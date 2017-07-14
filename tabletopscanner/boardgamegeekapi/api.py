@@ -2,7 +2,8 @@ import time
 import urllib.parse
 import urllib.request
 
-from tabletopscanner.boardgamegeekapi.parser import deserialize
+from tabletopscanner.boardgamegeekapi.game import GameParser
+from tabletopscanner.boardgamegeekapi.price import PriceParser
 
 
 class BggApi:
@@ -10,8 +11,12 @@ class BggApi:
     DEFAULT_RETRY_DELAY = 5
 
     def __init__(self, username):
-        self.base_url = "https://www.boardgamegeek.com/xmlapi2/collection?{0}"
+        self.bgg_collection_url = "https://www.boardgamegeek.com/xmlapi2/collection?{0}"
+        self.board_game_prices_url = "https://www.boardgameprices.com/api/public/bggRedirect/{0}"
         self.username = username
+
+        self.game_parser = GameParser()
+        self.price_parser = PriceParser()
 
     def request_buy_list(self):
         """
@@ -19,11 +24,13 @@ class BggApi:
         :raises: BggException if request or retry after processing failed
         """
         query_params = {'username': self.username, 'wanttobuy': 1}
-        url = self.base_url.format(urllib.parse.urlencode(query_params))
+        url = self.bgg_collection_url.format(urllib.parse.urlencode(query_params))
 
         xml = BggApi.__request_collection(url)
 
-        games = deserialize(xml)
+        games = self.game_parser.deserialize(xml)
+        games = self.add_price_to_games(games)
+
         return games
 
     def request_play_list(self):
@@ -33,11 +40,31 @@ class BggApi:
         :raises: BggException if request or retry after processing failed
         """
         query_params = {'username': self.username, 'wanttoplay': 1}
-        url = self.base_url.format(urllib.parse.urlencode(query_params))
+        url = self.bgg_collection_url.format(urllib.parse.urlencode(query_params))
 
         xml = BggApi.__request_collection(url)
-        games = deserialize(xml)
+
+        games = self.game_parser.deserialize(xml)
+        games = self.add_price_to_games(games)
+
         return games
+
+    def add_price_to_games(self, games):
+        for game in games:
+            prices = self.request_price(game.gameid)
+            game.prices = prices
+            time.sleep(10)
+        return games
+
+    def request_price(self, bgg_id):
+        url = self.board_game_prices_url.format(bgg_id)
+        headers = {'Content-Type': 'application/json',
+                   'application/json': 'application/json',
+                   'X-Requested-With': 'XMLHttpRequest'}
+
+        html = BggApi.__make_request(url).read().decode("utf-8")
+        prices = self.price_parser.deserialize(html)
+        return prices
 
     @staticmethod
     def __request_collection(url):
@@ -97,8 +124,15 @@ class BggApi:
             return res
 
     @staticmethod
-    def __make_request(url):
-        return urllib.request.urlopen(url)
+    def __make_request(url, headers=None):
+        req = urllib.request.Request(url)
+
+        if headers is not None:
+            for key, value in headers.items():
+                req.add_header(key, value)
+
+        resp = urllib.request.urlopen(req)
+        return resp
 
     @staticmethod
     def __process_error(response):
