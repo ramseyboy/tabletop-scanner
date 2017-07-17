@@ -1,23 +1,13 @@
 import json
 import xml.etree.cElementTree as et
+from collections import OrderedDict
 
 from tabletopscanner.boardgamegeekapi.parsers import Deserializer, Serializer
 
 
-class Game:
-    def __init__(self, gameid, collectionid, name, yearpublished, image, thumbnail, prices=None):
-        self.gameid = gameid
-        self.collectionid = collectionid
-        self.name = name
-        self.yearpublished = yearpublished
-        self.image = image
-        self.thumbnail = thumbnail
-        self.prices = prices
-
-
 class GameParser(Serializer, Deserializer):
     def serialize(self, games):
-        return json.dumps(games, cls=GameEncoder, indent=4)
+        return json.dumps(games, indent=4)
 
     def deserialize(self, xml):
         tree = et.fromstring(xml)
@@ -25,18 +15,38 @@ class GameParser(Serializer, Deserializer):
 
     @staticmethod
     def __make_game(el):
-        return Game(
-            gameid=el.attrib['objectid'],
-            collectionid=el.attrib['collid'],
-            name=el.find('name').text,
-            yearpublished=el.find('yearpublished').text,
-            image=el.find('image').text,
-            thumbnail=el.find('thumbnail').text)
 
+        geekid = None
+        try:
+            geekid = el.attrib['objectid']
+        except KeyError:
+            geekid = el.attrib['id']
 
-class GameEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, Game):
-            return o.__dict__
-        else:
-            return json.JSONEncoder.default(self, o)
+        name = None
+        try:
+            name = el.find('name').text
+        except KeyError:
+            name = el.find('name').attrib['value']
+
+        yearpublished = None
+        try:
+            yearpublished = el.find('yearpublished').text
+        except KeyError:
+            yearpublished = el.find('yearpublished').attrib['value']
+
+        description = None
+        try:
+            description = el.find('description').text
+        except KeyError:
+            # no description
+            pass
+
+        return OrderedDict({
+            'geekid': geekid,
+            'name': name,
+            'yearpublished': yearpublished,
+            'image': el.find('image').text,
+            'thumbnail': el.find('thumbnail').text,
+            'description': description,
+            'prices': None
+        })

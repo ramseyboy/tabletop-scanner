@@ -11,12 +11,28 @@ class BggApi:
     DEFAULT_RETRY_DELAY = 5
 
     def __init__(self, username):
+        self.bgg_thing_url = "https://www.boardgamegeek.com/xmlapi2/thing?{0}"
         self.bgg_collection_url = "https://www.boardgamegeek.com/xmlapi2/collection?{0}"
         self.board_game_prices_url = "https://www.boardgameprices.com/api/public/bggRedirect/{0}"
         self.username = username
 
         self.game_parser = GameParser()
         self.price_parser = PriceParser()
+
+    def request_game(self, geekid):
+        """
+        :return:
+        :raises: BggException if request failed
+        """
+        query_params = {'id': geekid}
+        url = self.bgg_thing_url.format(urllib.parse.urlencode(query_params))
+
+        xml = BggApi.__make_request(url)
+
+        game = self.game_parser.deserialize(xml.read())
+        games = self.add_price_to_games(game)
+
+        return games
 
     def request_buy_list(self):
         """
@@ -51,9 +67,8 @@ class BggApi:
 
     def add_price_to_games(self, games):
         for game in games:
-            prices = self.request_price(game.gameid)
-            game.prices = prices
-            time.sleep(10)
+            prices = self.request_price(game['geekid'])
+            game['prices'] = prices
         return games
 
     def request_price(self, bgg_id):

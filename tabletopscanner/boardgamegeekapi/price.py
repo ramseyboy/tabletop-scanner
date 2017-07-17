@@ -4,16 +4,6 @@ import re
 from tabletopscanner.boardgamegeekapi.parsers import Deserializer
 
 
-class Price:
-    def __init__(self, gameid, collectionid, name, yearpublished, image, thumbnail):
-        self.gameid = gameid
-        self.collectionid = collectionid
-        self.name = name
-        self.yearpublished = yearpublished
-        self.image = image
-        self.thumbnail = thumbnail
-
-
 class PriceParser(Deserializer):
     def deserialize(self, html):
         pattern = re.compile(r'<script>var prices = (.*?)</script>', re.MULTILINE | re.DOTALL)

@@ -10,6 +10,7 @@ from tabletopscanner.boardgamegeekapi.game import GameParser
 api = BggApi('ramseyboy')
 game_parser = GameParser()
 
+
 @app.route('/')
 def index():
     """
@@ -47,6 +48,17 @@ def has_no_empty_params(rule):
     defaults = rule.defaults if rule.defaults is not None else ()
     arguments = rule.arguments if rule.arguments is not None else ()
     return len(defaults) >= len(arguments)
+
+
+@app.route('/api/game/<path:geekid>', methods=['GET'])
+def game_by_id(geekid):
+    """
+    Return user's wanttobuy list
+    """
+
+    game = api.request_game(geekid)
+
+    return make_response(game_parser.serialize(game), 200, {'Content-Type': 'application/json'})
 
 
 @app.route('/api/buy', methods=['GET'])
