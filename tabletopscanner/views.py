@@ -11,14 +11,6 @@ api = BggApi('ramseyboy')
 game_parser = GameParser()
 
 
-@app.route('/')
-def index():
-    """
-    Home page
-    """
-    return render_template('index.html'), 200
-
-
 @app.errorhandler(404)
 def not_found(error):
     """
@@ -108,3 +100,11 @@ def application_data():
 
 
 envdump.add_section("application", application_data)
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def index(path):
+    """
+    Home page
+    """
+    return render_template('index.html')
