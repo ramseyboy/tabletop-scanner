@@ -4,20 +4,38 @@ import urllib.request
 
 from tabletopscanner.boardgamegeekapi.game import GameParser
 from tabletopscanner.boardgamegeekapi.price import PriceParser
+from tabletopscanner.boardgamegeekapi.search import SearchParser
 
 
 class BggApi:
     DEFAULT_202_RETRY_TIMES = 5
     DEFAULT_RETRY_DELAY = 5
 
+    bgg_search_url = "https://www.boardgamegeek.com/xmlapi2/search?{0}"
+    bgg_thing_url = "https://www.boardgamegeek.com/xmlapi2/thing?{0}"
+    bgg_collection_url = "https://www.boardgamegeek.com/xmlapi2/collection?{0}"
+    board_game_prices_url = "https://www.boardgameprices.com/api/public/bggRedirect/{0}"
+
     def __init__(self, username):
-        self.bgg_thing_url = "https://www.boardgamegeek.com/xmlapi2/thing?{0}"
-        self.bgg_collection_url = "https://www.boardgamegeek.com/xmlapi2/collection?{0}"
-        self.board_game_prices_url = "https://www.boardgameprices.com/api/public/bggRedirect/{0}"
         self.username = username
 
         self.game_parser = GameParser()
         self.price_parser = PriceParser()
+        self.search_parser = SearchParser()
+
+    def search(self, query):
+        """
+        :return:
+        :raises: BggException if request failed
+        """
+        query_params = {'query': query}
+        url = self.bgg_search_url.format(urllib.parse.urlencode(query_params))
+
+        xml = BggApi.__make_request(url)
+
+        results = self.search_parser.deserialize(xml.read())
+
+        return results
 
     def request_game(self, geekid):
         """

@@ -1,6 +1,6 @@
 import json
 
-from flask import render_template, make_response, url_for
+from flask import render_template, make_response, url_for, request
 from healthcheck import HealthCheck, EnvironmentDump
 
 from tabletopscanner import app
@@ -50,10 +50,24 @@ def has_no_empty_params(rule):
     return len(defaults) >= len(arguments)
 
 
+@app.route('/api/search', methods=['GET'])
+def search():
+    """
+    Return search results from board game geek
+    """
+    q = request.args.get('q')
+    if q is None or len(q) < 1:
+        return make_response({'msg': 'must supply search query as \'q\' parameter'})
+
+    games = api.search(q)
+
+    return make_response(game_parser.serialize(games), 200, {'Content-Type': 'application/json'})
+
+
 @app.route('/api/game/<path:geekid>', methods=['GET'])
 def game_by_id(geekid):
     """
-    Return user's wanttobuy list
+    Return board game geek game data
     """
 
     game = api.request_game(geekid)
