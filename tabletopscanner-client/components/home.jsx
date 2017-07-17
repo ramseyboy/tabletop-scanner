@@ -7,6 +7,6 @@ export class Index extends React.Component {
     }
 
     render() {
-        return (<h1>Index</h1>);
+        return (<h1>Track your board game wishlist here!</h1>);
     }
 }

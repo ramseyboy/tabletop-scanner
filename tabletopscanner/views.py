@@ -1,6 +1,6 @@
 import json
 
-from flask import render_template, make_response, url_for, request
+from flask import render_template, make_response, url_for, request, abort
 from healthcheck import HealthCheck, EnvironmentDump
 
 from tabletopscanner import app
@@ -9,14 +9,6 @@ from tabletopscanner.boardgamegeekapi.game import GameParser
 
 api = BggApi('ramseyboy')
 game_parser = GameParser()
-
-
-@app.errorhandler(404)
-def not_found(error):
-    """
-    404 - Not Found route
-    """
-    return render_template('error.html'), 404
 
 
 @app.route('/api', methods=['GET'])
@@ -101,10 +93,17 @@ def application_data():
 
 envdump.add_section("application", application_data)
 
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def index(path):
+@app.route('/')
+@app.route('/search')
+def index():
     """
     Home page
     """
     return render_template('index.html')
+
+@app.errorhandler(404)
+def not_found(error):
+    """
+    404 - Not Found route
+    """
+    return render_template('error.html'), 404
