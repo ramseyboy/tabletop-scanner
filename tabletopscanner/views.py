@@ -14,7 +14,7 @@ game_parser = GameParser()
 @app.route('/api', methods=['GET'])
 def api_root():
     """
-    Api root dir
+    TabletopApi root dir
     """
     links = []
     for rule in app.url_map.iter_rules():

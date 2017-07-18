@@ -1,0 +1,58 @@
+body {
+    background: #343d46;
+}
+
+.box {
+    margin: 50px auto;
+    width: 300px;
+    height: 50px;
+}
+
+.container {
+    width: 300px;
+    vertical-align: middle;
+    white-space: nowrap;
+    position: relative;
+}
+
+.container input.search {
+    width: 300px;
+    height: 50px;
+    background: #2b303b;
+    border: none;
+    font-size: 10pt;
+    float: left;
+    color: #262626;
+    padding-left: 45px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+
+    -webkit-transition: background .55s ease;
+    -moz-transition: background .55s ease;
+    -ms-transition: background .55s ease;
+    -o-transition: background .55s ease;
+    transition: background .55s ease;
+}
+
+.container input.search::-webkit-input-placeholder {
+    color: #65737e;
+}
+
+.container input.search:-moz-placeholder { /* Firefox 18- */
+    color: #65737e;
+}
+
+.container input.search::-moz-placeholder { /* Firefox 19+ */
+    color: #65737e;
+}
+
+.container input.search:-ms-input-placeholder {
+    color: #65737e;
+}
+
+.container input.search:hover, .container input.search:focus, .container input.search:active {
+    outline: none;
+    background: #ffffff;
+}
+
